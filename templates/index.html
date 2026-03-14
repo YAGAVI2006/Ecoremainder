@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}EcoReminder — Smart Dustbin Alert System{% endblock %}
+
+{% block content %}
+  <div class="text-center py-5">
+    <h1 class="display-5">EcoReminder</h1>
+    <p class="lead">Report full dustbins, track cleanups, and keep your city clean.</p>
+    <div class="d-flex justify-content-center gap-2">
+      <a class="btn btn-success btn-lg" href="{{ url_for('register') }}">Register</a>
+      <a class="btn btn-outline-success btn-lg" href="{{ url_for('login') }}">Citizen Login</a>
+    </div>
+    <hr class="my-5">
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Report a full dustbin</h5>
+            <p class="card-text">Submit a location and photo—our team will get it collected.</p>
+            <a href="{{ url_for('report') }}" class="btn btn-outline-success">Report now</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Collector dashboard</h5>
+            <p class="card-text">Collectors can log in to accept tasks and update statuses.</p>
+            <a href="{{ url_for('collector_login') }}" class="btn btn-outline-success">Collector login</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Admin analytics</h5>
+            <p class="card-text">View total complaints, pending work, and monitor progress.</p>
+            <a href="{{ url_for('admin_login') }}" class="btn btn-outline-success">Admin login</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

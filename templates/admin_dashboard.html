@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard — EcoReminder{% endblock %}
+
+{% block content %}
+  <div class="mb-4">
+    <h2>Admin Dashboard</h2>
+    <p class="text-muted">Monitor system activity and assign reports to collectors.</p>
+  </div>
+
+  <div class="row gy-3">
+    <div class="col-md-4">
+      <div class="card shadow-sm border-start border-success border-4">
+        <div class="card-body">
+          <h5 class="card-title">Total reports</h5>
+          <p class="display-6 mb-0">{{ total }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm border-start border-warning border-4">
+        <div class="card-body">
+          <h5 class="card-title">Pending</h5>
+          <p class="display-6 mb-0">{{ pending }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm border-start border-success border-4">
+        <div class="card-body">
+          <h5 class="card-title">Completed</h5>
+          <p class="display-6 mb-0">{{ collected }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <canvas id="statusChart" height="120"></canvas>
+  </div>
+
+  <div class="mt-5">
+    <h4>All Complaints</h4>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>User</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Assigned</th>
+            <th>Submitted</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in complaints %}
+            <tr>
+              <td>{{ c.complaint_id }}</td>
+              <td>{{ c.user_name or 'Unknown' }}</td>
+              <td>{{ c.location }}</td>
+              <td><span class="badge bg-{{ 'warning' if c.status == 'Pending' else 'info' if c.status == 'In Progress' else 'success' }}">{{ c.status }}</span></td>
+              <td>{{ c.collector_name or 'Unassigned' }}</td>
+              <td>{{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+              <td>
+                <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#assignModal{{ c.complaint_id }}">Assign</button>
+
+                <div class="modal fade" id="assignModal{{ c.complaint_id }}" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Assign complaint #{{ c.complaint_id }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <form method="POST" action="{{ url_for('admin_assign') }}">
+                        <input type="hidden" name="complaint_id" value="{{ c.complaint_id }}" />
+                        <div class="modal-body">
+                          <div class="mb-3">
+                            <label class="form-label">Collector</label>
+                            <select class="form-select" name="collector_id" required>
+                              <option value="">Select collector</option>
+                              {% for col in collectors %}
+                                <option value="{{ col.id }}" {% if col.name == c.collector_name %}selected{% endif %}>{{ col.name }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                          <button class="btn btn-success" type="submit">Assign</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const statusChart = document.getElementById('statusChart');
+  if (statusChart) {
+    new Chart(statusChart, {
+      type: 'doughnut',
+      data: {
+        labels: ['Pending', 'In Progress', 'Collected'],
+        datasets: [{
+          data: [{{ pending }}, {{ total - pending - collected }}, {{ collected }}],
+          backgroundColor: ['#ffc107', '#0dcaf0', '#198754'],
+        }],
+      },
+      options: {
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}

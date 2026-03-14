@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Collector Dashboard — EcoReminder{% endblock %}
+
+{% block content %}
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h2>Collector Dashboard</h2>
+      <p class="text-muted">Manage your assigned collection tasks.</p>
+    </div>
+    <a class="btn btn-outline-success" href="{{ url_for('logout') }}">Logout</a>
+  </div>
+
+  {% if complaints %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Reported</th>
+            <th>Proof</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in complaints %}
+            <tr>
+              <td>{{ c.complaint_id }}</td>
+              <td>{{ c.location }}</td>
+              <td>
+                <span class="badge bg-{{ 'warning' if c.status == 'Pending' else 'info' if c.status == 'In Progress' else 'success' }}">{{ c.status }}</span>
+              </td>
+              <td>{{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+              <td>
+                {% if c.proof_image %}
+                  <a href="{{ url_for('uploads', filename=c.proof_image) }}" target="_blank">View</a>
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <td>
+                <div class="d-flex gap-2">
+                  {% if c.status == 'Pending' %}
+                    <a href="{{ url_for('collector_accept', complaint_id=c.complaint_id) }}" class="btn btn-sm btn-success">Accept</a>
+                  {% endif %}
+                  {% if c.status != 'Collected' %}
+                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#updateModal{{ c.complaint_id }}">Update</button>
+                  {% endif %}
+                </div>
+
+                <div class="modal fade" id="updateModal{{ c.complaint_id }}" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Update Task #{{ c.complaint_id }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <form method="POST" action="{{ url_for('collector_update', complaint_id=c.complaint_id) }}" enctype="multipart/form-data">
+                        <div class="modal-body">
+                          <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status">
+                              <option value="Pending" {% if c.status == 'Pending' %}selected{% endif %}>Pending</option>
+                              <option value="In Progress" {% if c.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                              <option value="Collected" {% if c.status == 'Collected' %}selected{% endif %}>Collected</option>
+                            </select>
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label">Proof photo (optional)</label>
+                            <input class="form-control" type="file" name="proof_image" accept="image/*" />
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                          <button type="submit" class="btn btn-success">Save</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-info">No tasks assigned yet. Please check back later.</div>
+  {% endif %}
+{% endblock %}

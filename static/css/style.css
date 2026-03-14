@@ -1,0 +1,21 @@
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+.toast-container {
+  z-index: 1100;
+}
+
+@media (max-width: 575px) {
+  .toast-container {
+    width: 100%;
+    left: 0;
+    right: 0;
+  }
+}
