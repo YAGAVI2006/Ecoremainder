@@ -3,50 +3,267 @@
 {% block title %}Citizen Dashboard — EcoReminder{% endblock %}
 
 {% block content %}
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <div>
-      <h2>Welcome, {{ session.get('name') }}</h2>
-      <p class="text-muted">Track your reports and compost better.</p>
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div>
+    <h2 class="font-outfit mb-1">Welcome back, {{ session.get('name') }}! 👋</h2>
+    <p class="text-muted small mb-0">Track your submitted dustbin reports and monitor cleanup progress in real-time.</p>
+  </div>
+  <a href="{{ url_for('report') }}" class="btn btn-eco-primary shadow-sm">
+    <i class="bi bi-plus-circle-fill me-2"></i> Report New Dustbin
+  </a>
+</div>
+
+<!-- Citizen Summary Metrics -->
+{% set pending_count = complaints | selectattr('status', 'equalto', 'Pending') | list | length %}
+{% set progress_count = complaints | selectattr('status', 'equalto', 'In Progress') | list | length %}
+{% set collected_count = complaints | selectattr('status', 'equalto', 'Collected') | list | length %}
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="metric-card p-3">
+      <div class="metric-icon total">
+        <i class="bi bi-folder2-open"></i>
+      </div>
+      <div>
+        <div class="metric-value">{{ complaints | length }}</div>
+        <div class="metric-label">Total Reports</div>
+      </div>
     </div>
-    <a href="{{ url_for('report') }}" class="btn btn-success">Report a dustbin</a>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="metric-card p-3">
+      <div class="metric-icon pending">
+        <i class="bi bi-hourglass-split"></i>
+      </div>
+      <div>
+        <div class="metric-value">{{ pending_count }}</div>
+        <div class="metric-label">Pending</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="metric-card p-3">
+      <div class="metric-icon progress">
+        <i class="bi bi-gear-wide-connected"></i>
+      </div>
+      <div>
+        <div class="metric-value">{{ progress_count }}</div>
+        <div class="metric-label">In Progress</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="metric-card p-3">
+      <div class="metric-icon collected">
+        <i class="bi bi-check2-all"></i>
+      </div>
+      <div>
+        <div class="metric-value">{{ collected_count }}</div>
+        <div class="metric-label">Collected</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Interactive Map Container -->
+{% if complaints %}
+<div class="card card-eco mb-4">
+  <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between border-bottom-0">
+    <h5 class="font-outfit mb-0">
+      <i class="bi bi-map-fill text-success me-2"></i> Your Reported Bins Map
+    </h5>
+    <span class="badge bg-light text-dark fw-normal">Interactive Locations</span>
+  </div>
+  <div class="card-body p-0">
+    <div id="citizenMap" class="map-container" style="border-radius: 0 0 16px 16px;"></div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Filters & Search Toolbar -->
+<div class="card card-eco">
+  <div class="card-header bg-white py-3 border-bottom-0">
+    <div class="row g-3 align-items-center">
+      <div class="col-md-6">
+        <div class="btn-group w-100" role="group">
+          <button type="button" class="btn btn-eco-primary btn-sm active" data-filter-status="all">All</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-filter-status="pending">Pending</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-filter-status="in progress">In Progress</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-filter-status="collected">Collected</button>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" id="tableSearchInput" class="form-control border-start-0" placeholder="Search by location, status, or description..." />
+        </div>
+      </div>
+    </div>
   </div>
 
-  {% if complaints %}
-    <div class="table-responsive">
-      <table class="table table-hover align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>#</th>
-            <th>Date</th>
-            <th>Location</th>
-            <th>Status</th>
-            <th>Assigned</th>
-            <th>Proof</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for item in complaints %}
+  <div class="card-body p-0">
+    {% if complaints %}
+      <div class="table-responsive">
+        <table class="table table-hover table-eco align-middle filterable-table">
+          <thead>
             <tr>
-              <td>{{ item.complaint_id }}</td>
-              <td>{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
-              <td>{{ item.location }}</td>
-              <td>
-                <span class="badge bg-{{ 'warning' if item.status == 'Pending' else 'info' if item.status == 'In Progress' else 'success' }}">{{ item.status }}</span>
-              </td>
-              <td>{{ item.assigned_collector or '—' }}</td>
-              <td>
-                {% if item.proof_image %}
-                  <a href="{{ url_for('uploads', filename=item.proof_image) }}" target="_blank">View</a>
-                {% else %}
-                  —
-                {% endif %}
-              </td>
+              <th>#ID</th>
+              <th>Submitted</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Collector Assigned</th>
+              <th>Photos</th>
+              <th class="text-end">Details</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  {% else %}
-    <div class="alert alert-info">You haven't submitted any reports yet. Start by reporting a full dustbin.</div>
-  {% endif %}
+          </thead>
+          <tbody>
+            {% for item in complaints %}
+              <tr data-status="{{ item.status }}">
+                <td class="fw-bold text-success">#{{ item.complaint_id }}</td>
+                <td class="small text-muted">
+                  {{ item.created_at.strftime('%Y-%m-%d %H:%M') if item.created_at else 'N/A' }}
+                </td>
+                <td>
+                  <div class="fw-semibold text-dark">{{ item.location }}</div>
+                  {% if item.description %}
+                    <div class="small text-muted text-truncate" style="max-width: 220px;">{{ item.description }}</div>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if item.status == 'Pending' %}
+                    <span class="badge-status badge-pending"><i class="bi bi-clock-history"></i> Pending</span>
+                  {% elif item.status == 'In Progress' %}
+                    <span class="badge-status badge-in-progress"><i class="bi bi-arrow-repeat spin"></i> In Progress</span>
+                  {% else %}
+                    <span class="badge-status badge-collected"><i class="bi bi-check-lg"></i> Collected</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if item.collector_name %}
+                    <div class="fw-medium text-dark">{{ item.collector_name }}</div>
+                    {% if item.collector_phone %}
+                      <div class="small text-muted"><i class="bi bi-telephone me-1"></i>{{ item.collector_phone }}</div>
+                    {% endif %}
+                  {% else %}
+                    <span class="text-muted small"><em>Awaiting assignment</em></span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="d-flex gap-1">
+                    {% if item.image %}
+                      <a href="{{ url_for('uploads', filename=item.image) }}" target="_blank" class="badge bg-light text-primary border" title="Report Photo">
+                        <i class="bi bi-image me-1"></i> Bin Photo
+                      </a>
+                    {% endif %}
+                    {% if item.proof_image %}
+                      <a href="{{ url_for('uploads', filename=item.proof_image) }}" target="_blank" class="badge bg-success bg-opacity-10 text-success border border-success" title="Cleaned Proof Photo">
+                        <i class="bi bi-check-circle-fill me-1"></i> Proof
+                      </a>
+                    {% endif %}
+                  </div>
+                </td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#detailModal{{ item.complaint_id }}">
+                    <i class="bi bi-eye-fill me-1"></i> View
+                  </button>
+
+                  <!-- Complaint Detail Modal -->
+                  <div class="modal fade text-start" id="detailModal{{ item.complaint_id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                      <div class="modal-content border-0 shadow-lg">
+                        <div class="modal-header bg-success text-white">
+                          <h5 class="modal-title font-outfit">Report Details #{{ item.complaint_id }}</h5>
+                          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                          <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                              <div class="p-3 bg-light rounded-3">
+                                <div class="text-uppercase text-muted small fw-bold mb-1">Status</div>
+                                <div>
+                                  {% if item.status == 'Pending' %}
+                                    <span class="badge-status badge-pending fs-6"><i class="bi bi-clock-history"></i> Pending Assignment</span>
+                                  {% elif item.status == 'In Progress' %}
+                                    <span class="badge-status badge-in-progress fs-6"><i class="bi bi-arrow-repeat spin"></i> Collection in Progress</span>
+                                  {% else %}
+                                    <span class="badge-status badge-collected fs-6"><i class="bi bi-check-circle-fill"></i> Waste Cleaned & Collected</span>
+                                  {% endif %}
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="p-3 bg-light rounded-3">
+                                <div class="text-uppercase text-muted small fw-bold mb-1">Collector Assigned</div>
+                                <div class="fw-bold fs-6 text-dark">{{ item.collector_name or 'Unassigned' }}</div>
+                                {% if item.collector_phone %}
+                                  <div class="small text-muted"><i class="bi bi-telephone-fill text-success me-1"></i>{{ item.collector_phone }}</div>
+                                {% endif %}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="mb-4">
+                            <h6 class="fw-bold">Location Address:</h6>
+                            <p class="text-dark bg-light p-3 rounded-3">{{ item.location }}</p>
+                          </div>
+
+                          {% if item.description %}
+                            <div class="mb-4">
+                              <h6 class="fw-bold">Report Notes / Description:</h6>
+                              <p class="text-muted bg-light p-3 rounded-3">{{ item.description }}</p>
+                            </div>
+                          {% endif %}
+
+                          <!-- Photo Comparison: Before vs After -->
+                          <div class="row g-3">
+                            <div class="col-md-6">
+                              <h6 class="fw-bold text-danger">Original Report Photo (Before)</h6>
+                              {% if item.image %}
+                                <img src="{{ url_for('uploads', filename=item.image) }}" class="img-fluid rounded-3 border w-100" style="max-height: 240px; object-fit: cover;" alt="Report photo" />
+                              {% else %}
+                                <div class="p-4 text-center bg-light text-muted rounded-3">No photo attached during report</div>
+                              {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                              <h6 class="fw-bold text-success">Collection Proof Photo (After)</h6>
+                              {% if item.proof_image %}
+                                <img src="{{ url_for('uploads', filename=item.proof_image) }}" class="img-fluid rounded-3 border border-success w-100" style="max-height: 240px; object-fit: cover;" alt="Proof photo" />
+                              {% else %}
+                                <div class="p-4 text-center bg-light text-muted rounded-3">Collection pending / proof photo not yet uploaded</div>
+                              {% endif %}
+                            </div>
+                          </div>
+                        </div>
+                        <div class="modal-footer bg-light">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="p-5 text-center">
+        <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+        <h5 class="font-outfit text-dark mb-2">No Reports Submitted Yet</h5>
+        <p class="text-muted mb-4">You haven't reported any overflowing garbage bins yet. Start keeping your neighborhood clean!</p>
+        <a href="{{ url_for('report') }}" class="btn btn-eco-primary">
+          <i class="bi bi-plus-circle-fill me-2"></i> Submit Your First Dustbin Report
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    initComplaintsMap('citizenMap', '/api/complaints');
+  });
+</script>
 {% endblock %}

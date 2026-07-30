@@ -1,21 +1,298 @@
+/* EcoReminder Design System & Styling */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
+
+:root {
+  --eco-primary: #059669;
+  --eco-primary-hover: #047857;
+  --eco-primary-light: #d1fae5;
+  --eco-secondary: #0d9488;
+  --eco-accent: #10b981;
+  --eco-dark: #0f172a;
+  --eco-dark-lighter: #1e293b;
+  --eco-bg: #f8fafc;
+  --eco-card-bg: #ffffff;
+  --eco-text: #334155;
+  --eco-text-muted: #64748b;
+  --eco-border: #e2e8f0;
+
+  /* Status Colors */
+  --status-pending: #d97706;
+  --status-pending-bg: #fef3c7;
+  --status-progress: #0284c7;
+  --status-progress-bg: #e0f2fe;
+  --status-collected: #059669;
+  --status-collected-bg: #d1fae5;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 12px 24px -4px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+}
+
 body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--eco-bg);
+  color: var(--eco-text);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-main {
-  flex: 1;
+h1, h2, h3, h4, h5, h6, .navbar-brand, .font-outfit {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  color: var(--eco-dark);
 }
 
+/* Navbar */
+.navbar-eco {
+  background: linear-gradient(135deg, #064e3b 0%, #047857 50%, #0d9488 100%);
+  box-shadow: 0 4px 20px rgba(4, 120, 87, 0.25);
+  padding: 0.85rem 0;
+}
+
+.navbar-eco .navbar-brand {
+  color: #ffffff !important;
+  font-size: 1.5rem;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbar-eco .nav-link {
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-weight: 500;
+  padding: 0.5rem 1rem !important;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.navbar-eco .nav-link:hover,
+.navbar-eco .nav-link.active {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+}
+
+.role-badge {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Glass & Card Styling */
+.card-eco {
+  background: var(--eco-card-bg);
+  border: 1px solid var(--eco-border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.card-eco:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.card-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+}
+
+/* Buttons */
+.btn-eco-primary {
+  background: linear-gradient(135deg, var(--eco-primary) 0%, var(--eco-secondary) 100%);
+  color: #ffffff;
+  border: none;
+  font-weight: 600;
+  padding: 0.65rem 1.4rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+  transition: all 0.25s ease;
+}
+
+.btn-eco-primary:hover {
+  background: linear-gradient(135deg, var(--eco-primary-hover) 0%, #0f766e 100%);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(5, 150, 105, 0.35);
+}
+
+.btn-eco-outline {
+  background: transparent;
+  color: var(--eco-primary);
+  border: 2px solid var(--eco-primary);
+  font-weight: 600;
+  padding: 0.6rem 1.3rem;
+  border-radius: 10px;
+  transition: all 0.25s ease;
+}
+
+.btn-eco-outline:hover {
+  background: var(--eco-primary);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* Status Badges */
+.badge-status {
+  padding: 0.4rem 0.85rem;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.badge-pending {
+  background-color: var(--status-pending-bg);
+  color: var(--status-pending);
+  border: 1px solid rgba(217, 119, 6, 0.2);
+}
+
+.badge-in-progress {
+  background-color: var(--status-progress-bg);
+  color: var(--status-progress);
+  border: 1px solid rgba(2, 132, 199, 0.2);
+}
+
+.badge-collected {
+  background-color: var(--status-collected-bg);
+  color: var(--status-collected);
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+/* Metric Stats Cards */
+.metric-card {
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid var(--eco-border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.metric-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.metric-icon.total { background: #e0f2fe; color: #0284c7; }
+.metric-icon.pending { background: #fef3c7; color: #d97706; }
+.metric-icon.progress { background: #e0e7ff; color: #4f46e5; }
+.metric-icon.collected { background: #d1fae5; color: #059669; }
+
+.metric-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--eco-dark);
+}
+
+.metric-label {
+  color: var(--eco-text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Map Containers */
+.map-container {
+  height: 380px;
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid var(--eco-border);
+  box-shadow: var(--shadow-sm);
+  z-index: 1;
+}
+
+.map-picker-container {
+  height: 320px;
+  width: 100%;
+  border-radius: 12px;
+  border: 2px dashed var(--eco-primary);
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+/* Tables */
+.table-eco {
+  margin-bottom: 0;
+}
+
+.table-eco th {
+  background-color: #f1f5f9;
+  color: var(--eco-dark);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.9rem 1rem;
+  border-bottom: 2px solid var(--eco-border);
+}
+
+.table-eco td {
+  padding: 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--eco-border);
+}
+
+/* Photo Dropzone & Preview */
+.photo-dropzone {
+  border: 2px dashed var(--eco-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+}
+
+.photo-dropzone:hover {
+  border-color: var(--eco-primary);
+  background: var(--eco-primary-light);
+}
+
+.preview-thumbnail {
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--eco-border);
+}
+
+/* Toasts */
 .toast-container {
   z-index: 1100;
 }
 
-@media (max-width: 575px) {
-  .toast-container {
-    width: 100%;
-    left: 0;
-    right: 0;
-  }
+/* Footer */
+footer {
+  background: #ffffff;
+  border-top: 1px solid var(--eco-border);
+  color: var(--eco-text-muted);
 }

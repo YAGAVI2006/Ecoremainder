@@ -3,125 +3,340 @@
 {% block title %}Admin Dashboard — EcoReminder{% endblock %}
 
 {% block content %}
-  <div class="mb-4">
-    <h2>Admin Dashboard</h2>
-    <p class="text-muted">Monitor system activity and assign reports to collectors.</p>
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div>
+    <h2 class="font-outfit mb-1">City Administration Dashboard 🛡️</h2>
+    <p class="text-muted small mb-0">System overview, sanitation analytics, interactive bin mapping, and officer management.</p>
   </div>
+  <button class="btn btn-eco-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#addCollectorModal">
+    <i class="bi bi-person-plus-fill me-2"></i> Add New Collector
+  </button>
+</div>
 
-  <div class="row gy-3">
-    <div class="col-md-4">
-      <div class="card shadow-sm border-start border-success border-4">
-        <div class="card-body">
-          <h5 class="card-title">Total reports</h5>
-          <p class="display-6 mb-0">{{ total }}</p>
-        </div>
+<!-- Admin KPI Summary Metrics -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3 col-6">
+    <div class="metric-card p-3">
+      <div class="metric-icon total">
+        <i class="bi bi-pie-chart-fill"></i>
       </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card shadow-sm border-start border-warning border-4">
-        <div class="card-body">
-          <h5 class="card-title">Pending</h5>
-          <p class="display-6 mb-0">{{ pending }}</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card shadow-sm border-start border-success border-4">
-        <div class="card-body">
-          <h5 class="card-title">Completed</h5>
-          <p class="display-6 mb-0">{{ collected }}</p>
-        </div>
+      <div>
+        <div class="metric-value">{{ total }}</div>
+        <div class="metric-label">Total Reports</div>
       </div>
     </div>
   </div>
-
-  <div class="mt-4">
-    <canvas id="statusChart" height="120"></canvas>
+  <div class="col-md-3 col-6">
+    <div class="metric-card p-3">
+      <div class="metric-icon pending">
+        <i class="bi bi-hourglass-split"></i>
+      </div>
+      <div>
+        <div class="metric-value">{{ pending }}</div>
+        <div class="metric-label">Pending</div>
+      </div>
+    </div>
   </div>
+  <div class="col-md-3 col-6">
+    <div class="metric-card p-3">
+      <div class="metric-icon progress">
+        <i class="bi bi-arrow-repeat"></i>
+      </div>
+      <div>
+        <div class="metric-value">{{ in_progress }}</div>
+        <div class="metric-label">In Progress</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="metric-card p-3">
+      <div class="metric-icon collected">
+        <i class="bi bi-check-circle-fill"></i>
+      </div>
+      <div>
+        <div class="metric-value">{{ collected }}</div>
+        <div class="metric-label">Collected</div>
+      </div>
+    </div>
+  </div>
+</div>
 
-  <div class="mt-5">
-    <h4>All Complaints</h4>
-    <div class="table-responsive">
-      <table class="table table-hover align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>#</th>
-            <th>User</th>
-            <th>Location</th>
-            <th>Status</th>
-            <th>Assigned</th>
-            <th>Submitted</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for c in complaints %}
-            <tr>
-              <td>{{ c.complaint_id }}</td>
-              <td>{{ c.user_name or 'Unknown' }}</td>
-              <td>{{ c.location }}</td>
-              <td><span class="badge bg-{{ 'warning' if c.status == 'Pending' else 'info' if c.status == 'In Progress' else 'success' }}">{{ c.status }}</span></td>
-              <td>{{ c.collector_name or 'Unassigned' }}</td>
-              <td>{{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
-              <td>
-                <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#assignModal{{ c.complaint_id }}">Assign</button>
+<!-- Interactive Analytics Charts & Real-time System Map -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-4">
+    <div class="card card-eco h-100 p-3">
+      <h5 class="font-outfit mb-3">
+        <i class="bi bi-graph-up text-success me-2"></i> Status Analytics
+      </h5>
+      <div class="d-flex align-items-center justify-content-center flex-grow-1">
+        <canvas id="statusChart" height="220"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card card-eco h-100">
+      <div class="card-header bg-white py-3 border-bottom-0 d-flex justify-content-between align-items-center">
+        <h5 class="font-outfit mb-0">
+          <i class="bi bi-geo-alt-fill text-danger me-2"></i> Live City Dustbin Network Map
+        </h5>
+        <span class="badge bg-success bg-opacity-10 text-success fw-normal">Real-time Pins</span>
+      </div>
+      <div class="card-body p-0">
+        <div id="adminMap" class="map-container" style="height: 300px; border-radius: 0 0 16px 16px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
-                <div class="modal fade" id="assignModal{{ c.complaint_id }}" tabindex="-1" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title">Assign complaint #{{ c.complaint_id }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                      </div>
-                      <form method="POST" action="{{ url_for('admin_assign') }}">
-                        <input type="hidden" name="complaint_id" value="{{ c.complaint_id }}" />
-                        <div class="modal-body">
-                          <div class="mb-3">
-                            <label class="form-label">Collector</label>
-                            <select class="form-select" name="collector_id" required>
-                              <option value="">Select collector</option>
-                              {% for col in collectors %}
-                                <option value="{{ col.id }}" {% if col.name == c.collector_name %}selected{% endif %}>{{ col.name }}</option>
-                              {% endfor %}
-                            </select>
+<!-- Tabs Navigation: Complaints vs Collectors -->
+<ul class="nav nav-tabs nav-tabs-eco border-bottom mb-3" id="adminTabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active font-outfit fw-bold px-4" id="complaints-tab" data-bs-toggle="tab" data-bs-target="#complaints-panel" type="button" role="tab">
+      <i class="bi bi-list-stars me-2"></i> All Reports ({{ complaints | length }})
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link font-outfit fw-bold px-4" id="collectors-tab" data-bs-toggle="tab" data-bs-target="#collectors-panel" type="button" role="tab">
+      <i class="bi bi-people-fill me-2"></i> Sanitation Officers ({{ collectors | length }})
+    </button>
+  </li>
+</ul>
+
+<div class="tab-content" id="adminTabContent">
+  <!-- Complaints Tab Panel -->
+  <div class="tab-pane fade show active" id="complaints-panel" role="tabpanel">
+    <div class="card card-eco">
+      <div class="card-header bg-white py-3 border-bottom-0">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-6">
+            <div class="btn-group w-100" role="group">
+              <button type="button" class="btn btn-eco-primary btn-sm active" data-filter-status="all">All</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" data-filter-status="pending">Pending</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" data-filter-status="in progress">In Progress</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" data-filter-status="collected">Collected</button>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+              <input type="text" id="tableSearchInput" class="form-control border-start-0" placeholder="Search by citizen, location, or collector..." />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-eco align-middle filterable-table">
+            <thead>
+              <tr>
+                <th>#ID</th>
+                <th>Citizen</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Assigned Officer</th>
+                <th>Submitted</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in complaints %}
+                <tr data-status="{{ c.status }}">
+                  <td class="fw-bold text-success">#{{ c.complaint_id }}</td>
+                  <td>
+                    <div class="fw-semibold text-dark">{{ c.user_name or 'Unknown User' }}</div>
+                  </td>
+                  <td>
+                    <div class="fw-medium text-dark">{{ c.location }}</div>
+                  </td>
+                  <td>
+                    {% if c.status == 'Pending' %}
+                      <span class="badge-status badge-pending"><i class="bi bi-clock-history"></i> Pending</span>
+                    {% elif c.status == 'In Progress' %}
+                      <span class="badge-status badge-in-progress"><i class="bi bi-arrow-repeat spin"></i> In Progress</span>
+                    {% else %}
+                      <span class="badge-status badge-collected"><i class="bi bi-check-lg"></i> Collected</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if c.collector_name %}
+                      <span class="badge bg-light text-dark border"><i class="bi bi-person-fill text-primary me-1"></i> {{ c.collector_name }}</span>
+                    {% else %}
+                      <span class="badge bg-warning bg-opacity-10 text-warning border border-warning">Unassigned</span>
+                    {% endif %}
+                  </td>
+                  <td class="small text-muted">
+                    {{ c.created_at.strftime('%Y-%m-%d %H:%M') if c.created_at else '' }}
+                  </td>
+                  <td class="text-end">
+                    <button class="btn btn-sm btn-eco-primary" data-bs-toggle="modal" data-bs-target="#assignModal{{ c.complaint_id }}">
+                      <i class="bi bi-person-plus me-1"></i> Assign
+                    </button>
+
+                    <!-- Assign Modal -->
+                    <div class="modal fade text-start" id="assignModal{{ c.complaint_id }}" tabindex="-1" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow-lg">
+                          <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title font-outfit">Assign Officer to Report #{{ c.complaint_id }}</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                           </div>
+                          <form method="POST" action="{{ url_for('admin_assign') }}">
+                            <input type="hidden" name="complaint_id" value="{{ c.complaint_id }}" />
+                            <div class="modal-body p-4">
+                              <div class="mb-3">
+                                <label class="form-label fw-bold">Bin Location</label>
+                                <div class="p-2.5 bg-light rounded text-dark small fw-medium">{{ c.location }}</div>
+                              </div>
+                              <div class="mb-3">
+                                <label class="form-label fw-bold">Select Sanitation Collector</label>
+                                <select class="form-select" name="collector_id" required>
+                                  <option value="">-- Choose Collector --</option>
+                                  {% for col in collectors %}
+                                    <option value="{{ col.id }}" {% if col.name == c.collector_name %}selected{% endif %}>
+                                      {{ col.name }} (Active tasks: {{ col.active_tasks }})
+                                    </option>
+                                  {% endfor %}
+                                </select>
+                              </div>
+                            </div>
+                            <div class="modal-footer bg-light">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                              <button class="btn btn-success" type="submit">
+                                <i class="bi bi-check-circle-fill me-1"></i> Save Assignment
+                              </button>
+                            </div>
+                          </form>
                         </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                          <button class="btn btn-success" type="submit">Assign</button>
-                        </div>
-                      </form>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- Collectors Tab Panel -->
+  <div class="tab-pane fade" id="collectors-panel" role="tabpanel">
+    <div class="card card-eco">
+      <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="font-outfit mb-0">Sanitation Officers & Collectors</h5>
+        <button class="btn btn-sm btn-eco-primary" data-bs-toggle="modal" data-bs-target="#addCollectorModal">
+          <i class="bi bi-plus-circle me-1"></i> Add Collector
+        </button>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-eco align-middle">
+            <thead>
+              <tr>
+                <th>#ID</th>
+                <th>Collector Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Active Assigned Tasks</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for col in collectors %}
+                <tr>
+                  <td class="fw-bold">#{{ col.id }}</td>
+                  <td class="fw-semibold text-dark">{{ col.name }}</td>
+                  <td>{{ col.email }}</td>
+                  <td>{{ col.phone or 'N/A' }}</td>
+                  <td>
+                    <span class="badge bg-info text-dark fw-bold">{{ col.active_tasks }} pending/in-progress</span>
+                  </td>
+                  <td class="text-end">
+                    <form method="POST" action="{{ url_for('admin_delete_collector', collector_id=col.id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to remove collector {{ col.name }}?');">
+                      <button type="submit" class="btn btn-sm btn-outline-danger">
+                        <i class="bi bi-trash me-1"></i> Delete
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Collector Modal -->
+<div class="modal fade" id="addCollectorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title font-outfit">Add Sanitation Collector</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST" action="{{ url_for('admin_add_collector') }}">
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label fw-bold">Full Name <span class="text-danger">*</span></label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. Michael Sanitation" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Email Address <span class="text-danger">*</span></label>
+            <input type="email" name="email" class="form-control" placeholder="e.g. michael@ecoreminder.com" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Phone Number</label>
+            <input type="text" name="phone" class="form-control" placeholder="e.g. +1 555-0199" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Password <span class="text-danger">*</span></label>
+            <input type="password" name="password" class="form-control" placeholder="Password for collector login" required />
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-person-check-fill me-1"></i> Create Account
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-  const statusChart = document.getElementById('statusChart');
-  if (statusChart) {
-    new Chart(statusChart, {
-      type: 'doughnut',
-      data: {
-        labels: ['Pending', 'In Progress', 'Collected'],
-        datasets: [{
-          data: [{{ pending }}, {{ total - pending - collected }}, {{ collected }}],
-          backgroundColor: ['#ffc107', '#0dcaf0', '#198754'],
-        }],
-      },
-      options: {
-        plugins: {
-          legend: { position: 'bottom' }
+  document.addEventListener('DOMContentLoaded', () => {
+    // Render Admin Map
+    initComplaintsMap('adminMap', '/api/complaints');
+
+    // Render Status Chart
+    const ctx = document.getElementById('statusChart');
+    if (ctx) {
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Pending', 'In Progress', 'Collected'],
+          datasets: [{
+            data: [{{ pending }}, {{ in_progress }}, {{ collected }}],
+            backgroundColor: ['#d97706', '#0284c7', '#059669'],
+            borderWidth: 2,
+            borderColor: '#ffffff',
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom' }
+          }
         }
-      }
-    });
-  }
+      });
+    }
+  });
 </script>
 {% endblock %}

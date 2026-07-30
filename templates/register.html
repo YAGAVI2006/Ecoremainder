@@ -1,37 +1,64 @@
 {% extends "base.html" %}
 
-{% block title %}Register — EcoReminder{% endblock %}
+{% block title %}Register Citizen Account — EcoReminder{% endblock %}
 
 {% block content %}
-  <div class="row justify-content-center">
-    <div class="col-md-7 col-lg-5">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h3 class="card-title mb-3">Register</h3>
-          <form method="POST" novalidate>
-            <div class="mb-3">
-              <label class="form-label">Full name</label>
-              <input type="text" name="name" class="form-control" required />
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Email</label>
-              <input type="email" name="email" class="form-control" required />
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Password</label>
-              <input type="password" name="password" class="form-control" required />
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Confirm Password</label>
-              <input type="password" name="confirm" class="form-control" required />
-            </div>
-            <button class="btn btn-success w-100" type="submit">Create account</button>
-          </form>
-          <div class="mt-3 text-center">
-            Already have an account? <a href="{{ url_for('login') }}">Sign in</a>
+<div class="row justify-content-center py-4">
+  <div class="col-md-8 col-lg-6">
+    <div class="card card-eco shadow-md">
+      <div class="card-body p-4 p-md-5">
+        <div class="text-center mb-4">
+          <div class="metric-icon collected mx-auto mb-3" style="width:60px; height:60px; font-size:1.6rem;">
+            <i class="bi bi-person-plus-fill"></i>
           </div>
+          <h3 class="font-outfit text-dark mb-1">Citizen Registration</h3>
+          <p class="text-muted small">Create an account to report overflowing dustbins in your neighborhood</p>
         </div>
+
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-person text-muted"></i></span>
+              <input type="text" name="name" class="form-control" placeholder="e.g. Jane Doe" required />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-envelope text-muted"></i></span>
+              <input type="email" name="email" class="form-control" placeholder="jane@example.com" required />
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-lock text-muted"></i></span>
+                <input type="password" name="password" class="form-control" placeholder="••••••••" required />
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-shield-lock text-muted"></i></span>
+                <input type="password" name="confirm" class="form-control" placeholder="••••••••" required />
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-eco-primary w-100 py-2.5 mb-3" type="submit">
+            <i class="bi bi-check-circle-fill me-2"></i> Register Account
+          </button>
+
+          <div class="text-center small text-muted">
+            Already registered? <a href="{{ url_for('login') }}" class="text-success fw-bold">Sign In Here</a>
+          </div>
+        </form>
       </div>
     </div>
   </div>
+</div>
 {% endblock %}

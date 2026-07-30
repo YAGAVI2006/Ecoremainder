@@ -1,44 +1,123 @@
 {% extends "base.html" %}
 
-{% block title %}EcoReminder — Smart Dustbin Alert System{% endblock %}
+{% block title %}EcoReminder — Smart Waste Management & Dustbin Alert System{% endblock %}
 
 {% block content %}
-  <div class="text-center py-5">
-    <h1 class="display-5">EcoReminder</h1>
-    <p class="lead">Report full dustbins, track cleanups, and keep your city clean.</p>
-    <div class="d-flex justify-content-center gap-2">
-      <a class="btn btn-success btn-lg" href="{{ url_for('register') }}">Register</a>
-      <a class="btn btn-outline-success btn-lg" href="{{ url_for('login') }}">Citizen Login</a>
+<!-- Hero Section -->
+<div class="py-5 text-center px-4 rounded-4 mb-5" style="background: linear-gradient(135deg, rgba(5, 150, 105, 0.08) 0%, rgba(13, 148, 136, 0.08) 100%); border: 1px solid rgba(5, 150, 105, 0.15);">
+  <div class="max-w-3xl mx-auto py-3">
+    <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-2 rounded-pill mb-3">
+      <i class="bi bi-geo-alt-fill me-1"></i> Real-time Smart Sanitation Alert Network
+    </span>
+    <h1 class="display-4 fw-extrabold text-dark mb-3">Keep Your City Clean & Overflow-Free</h1>
+    <p class="lead text-muted mb-4 mx-auto" style="max-width: 700px;">
+      EcoReminder empowers citizens to report full garbage dustbins instantly with GPS pin-pointing, enables sanitation officers to pick up waste efficiently, and gives city admins real-time analytics.
+    </p>
+    <div class="d-flex flex-wrap justify-content-center gap-3">
+      {% if session.get('role') == 'citizen' %}
+        <a class="btn btn-eco-primary btn-lg shadow-sm" href="{{ url_for('report') }}">
+          <i class="bi bi-plus-circle-fill me-2"></i> Report Overflowing Bin
+        </a>
+        <a class="btn btn-eco-outline btn-lg" href="{{ url_for('citizen_dashboard') }}">
+          <i class="bi bi-grid-1x2-fill me-2"></i> My Dashboard
+        </a>
+      {% else %}
+        <a class="btn btn-eco-primary btn-lg shadow-sm" href="{{ url_for('register') }}">
+          <i class="bi bi-person-plus-fill me-2"></i> Join as Citizen
+        </a>
+        <a class="btn btn-eco-outline btn-lg" href="{{ url_for('login') }}">
+          <i class="bi bi-box-arrow-in-right me-2"></i> Citizen Login
+        </a>
+      {% endif %}
     </div>
-    <hr class="my-5">
-    <div class="row g-4">
-      <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">Report a full dustbin</h5>
-            <p class="card-text">Submit a location and photo—our team will get it collected.</p>
-            <a href="{{ url_for('report') }}" class="btn btn-outline-success">Report now</a>
-          </div>
-        </div>
+  </div>
+</div>
+
+<!-- Dynamic Impact Metrics -->
+<div class="row g-4 mb-5">
+  <div class="col-md-4">
+    <div class="metric-card">
+      <div class="metric-icon total">
+        <i class="bi bi-journal-text"></i>
       </div>
-      <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">Collector dashboard</h5>
-            <p class="card-text">Collectors can log in to accept tasks and update statuses.</p>
-            <a href="{{ url_for('collector_login') }}" class="btn btn-outline-success">Collector login</a>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">Admin analytics</h5>
-            <p class="card-text">View total complaints, pending work, and monitor progress.</p>
-            <a href="{{ url_for('admin_login') }}" class="btn btn-outline-success">Admin login</a>
-          </div>
-        </div>
+      <div>
+        <div class="metric-value">{{ total_complaints }}</div>
+        <div class="metric-label">Total Dustbin Reports</div>
       </div>
     </div>
   </div>
+  <div class="col-md-4">
+    <div class="metric-card">
+      <div class="metric-icon collected">
+        <i class="bi bi-check-circle-fill"></i>
+      </div>
+      <div>
+        <div class="metric-value">{{ total_collected }}</div>
+        <div class="metric-label">Bins Cleaned & Collected</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="metric-card">
+      <div class="metric-icon progress">
+        <i class="bi bi-truck"></i>
+      </div>
+      <div>
+        <div class="metric-value">{{ total_collectors }}</div>
+        <div class="metric-label">Active Sanitation Officers</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Workflow & Portal Cards -->
+<h3 class="font-outfit text-dark mb-4 text-center">How EcoReminder Works</h3>
+<div class="row g-4 mb-5">
+  <div class="col-md-4">
+    <div class="card card-eco h-100 p-3">
+      <div class="card-body text-center">
+        <div class="metric-icon total mx-auto mb-3" style="width:64px; height:64px; font-size:1.75rem;">
+          <i class="bi bi-camera-fill"></i>
+        </div>
+        <h4 class="card-title h5 font-outfit">1. Citizens Snap & Report</h4>
+        <p class="card-text text-muted small">
+          Notice a full bin? Snap a photo, auto-detect GPS location or pick on the interactive map, and submit in seconds.
+        </p>
+        {% if session.get('role') == 'citizen' %}
+          <a href="{{ url_for('report') }}" class="btn btn-sm btn-eco-primary w-100 mt-2">Report a Bin Now</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="btn btn-sm btn-eco-outline w-100 mt-2">Citizen Login</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card card-eco h-100 p-3">
+      <div class="card-body text-center">
+        <div class="metric-icon progress mx-auto mb-3" style="width:64px; height:64px; font-size:1.75rem;">
+          <i class="bi bi-truck-flatbed"></i>
+        </div>
+        <h4 class="card-title h5 font-outfit">2. Sanitation Crew Collects</h4>
+        <p class="card-text text-muted small">
+          Assigned collectors receive tasks on their dashboard, navigate using live map pins, and upload proof photos.
+        </p>
+        <a href="{{ url_for('collector_login') }}" class="btn btn-sm btn-eco-outline w-100 mt-2">Collector Login</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card card-eco h-100 p-3">
+      <div class="card-body text-center">
+        <div class="metric-icon collected mx-auto mb-3" style="width:64px; height:64px; font-size:1.75rem;">
+          <i class="bi bi-bar-chart-line-fill"></i>
+        </div>
+        <h4 class="card-title h5 font-outfit">3. Admin Monitoring</h4>
+        <p class="card-text text-muted small">
+          City administration monitors real-time analytics, assigns tasks, and tracks collection velocity.
+        </p>
+        <a href="{{ url_for('admin_login') }}" class="btn btn-sm btn-eco-outline w-100 mt-2">Admin Portal</a>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

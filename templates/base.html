@@ -3,68 +3,148 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{% block title %}EcoReminder{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BFhC/0hSJqzZq8N3oeo6YBDt3zoiUCG+JWpGMB4T2uYzR0UwkiyAoNef5nN/7z2l" crossorigin="anonymous">
+    <title>{% block title %}EcoReminder — Smart Dustbin Alert System{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 & Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Leaflet Maps CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Custom Eco CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
     {% block head %}{% endblock %}
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-eco sticky-top">
       <div class="container">
-        <a class="navbar-brand" href="{{ url_for('index') }}">EcoReminder</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <a class="navbar-brand" href="{{ url_for('index') }}">
+          <i class="bi bi-trash3-fill text-warning"></i>
+          <span>EcoReminder</span>
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
+          <ul class="navbar-nav ms-auto align-items-lg-center gap-1">
             {% if session.get('role') == 'citizen' %}
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('citizen_dashboard') }}">Dashboard</a></li>
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('report') }}">Report</a></li>
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+              <li class="nav-item">
+                <a class="nav-link {% if request.path == url_for('citizen_dashboard') %}active{% endif %}" href="{{ url_for('citizen_dashboard') }}">
+                  <i class="bi bi-grid-1x2-fill me-1"></i> Dashboard
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link {% if request.path == url_for('report') %}active{% endif %}" href="{{ url_for('report') }}">
+                  <i class="bi bi-plus-circle-fill me-1"></i> Report Bin
+                </a>
+              </li>
+              <li class="nav-item ms-lg-2">
+                <div class="d-flex align-items-center gap-2 text-white bg-white bg-opacity-10 px-3 py-1.5 rounded-3">
+                  <i class="bi bi-person-circle fs-5"></i>
+                  <span class="small fw-semibold">{{ session.get('name') }}</span>
+                  <span class="role-badge">Citizen</span>
+                  <a href="{{ url_for('logout') }}" class="text-white ms-2 text-decoration-none" title="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                  </a>
+                </div>
+              </li>
             {% elif session.get('role') == 'collector' %}
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('collector_dashboard') }}">Collector</a></li>
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+              <li class="nav-item">
+                <a class="nav-link {% if request.path == url_for('collector_dashboard') %}active{% endif %}" href="{{ url_for('collector_dashboard') }}">
+                  <i class="bi bi-truck me-1"></i> My Tasks
+                </a>
+              </li>
+              <li class="nav-item ms-lg-2">
+                <div class="d-flex align-items-center gap-2 text-white bg-white bg-opacity-10 px-3 py-1.5 rounded-3">
+                  <i class="bi bi-shield-check fs-5"></i>
+                  <span class="small fw-semibold">{{ session.get('name') }}</span>
+                  <span class="role-badge bg-primary">Collector</span>
+                  <a href="{{ url_for('logout') }}" class="text-white ms-2 text-decoration-none" title="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                  </a>
+                </div>
+              </li>
             {% elif session.get('role') == 'admin' %}
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin</a></li>
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+              <li class="nav-item">
+                <a class="nav-link {% if request.path == url_for('admin_dashboard') %}active{% endif %}" href="{{ url_for('admin_dashboard') }}">
+                  <i class="bi bi-speedometer2 me-1"></i> Admin Panel
+                </a>
+              </li>
+              <li class="nav-item ms-lg-2">
+                <div class="d-flex align-items-center gap-2 text-white bg-white bg-opacity-10 px-3 py-1.5 rounded-3">
+                  <i class="bi bi-person-badge fs-5"></i>
+                  <span class="small fw-semibold">{{ session.get('name') }}</span>
+                  <span class="role-badge bg-warning text-dark">Admin</span>
+                  <a href="{{ url_for('logout') }}" class="text-white ms-2 text-decoration-none" title="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                  </a>
+                </div>
+              </li>
             {% else %}
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Citizen Login</a></li>
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('collector_login') }}">Collector Login</a></li>
-              <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_login') }}">Admin Login</a></li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('login') }}">Citizen Login</a>
+              </li>
+              <li class="nav-item">
+                <a class="btn btn-sm btn-light fw-bold text-success px-3 ms-lg-1" href="{{ url_for('register') }}">Register</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('collector_login') }}">Collector Portal</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_login') }}">Admin Portal</a>
+              </li>
             {% endif %}
           </ul>
         </div>
       </div>
     </nav>
 
-    <main class="container my-4">
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          <div class="toast-container position-fixed top-0 end-0 p-3">
-            {% for category, message in messages %}
-              <div class="toast align-items-center text-bg-{{ 'info' if category=='info' else category }} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                  <div class="toast-body">{{ message }}</div>
-                  <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    <!-- Flash Toast Notifications -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="toast-container position-fixed top-0 end-0 p-3">
+          {% for category, message in messages %}
+            <div class="toast align-items-center text-bg-{{ 'success' if category=='success' else 'danger' if category=='danger' else 'warning' if category=='warning' else 'info' }} border-0 show shadow-lg" role="alert">
+              <div class="d-flex">
+                <div class="toast-body fw-medium py-3">
+                  <i class="bi bi-info-circle-fill me-2 fs-5"></i> {{ message }}
                 </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
               </div>
-            {% endfor %}
-          </div>
-        {% endif %}
-      {% endwith %}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
 
+    <main class="container my-4 flex-grow-1">
       {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-light py-3 mt-auto">
-      <div class="container text-center small text-muted">
-        © {{ current_year }} EcoReminder — Smart Dustbin Alert System
+    <footer class="py-4 mt-auto">
+      <div class="container text-center text-muted small">
+        <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+          <i class="bi bi-tree-fill text-success fs-5"></i>
+          <span class="fw-bold text-dark fs-6">EcoReminder Smart Dustbin Alert System</span>
+        </div>
+        <p class="mb-0">© {{ current_year }} EcoReminder — Cleaner Cities, Greener Future. All rights reserved.</p>
       </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-IhMsrv7qDQ8G1Lou5PF5cE4eHINQRDiI+czhrTxg5umRJEwX+ywpcj+U5b3Pp6c8" crossorigin="anonymous"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
     {% block scripts %}{% endblock %}
   </body>
