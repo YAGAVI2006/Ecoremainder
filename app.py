@@ -1,3 +1,5 @@
+import csv
+import io
 import os
 import sqlite3
 import uuid
@@ -6,6 +8,7 @@ from datetime import datetime
 import bcrypt
 from flask import (
     Flask,
+    Response,
     flash,
     jsonify,
     redirect,
@@ -632,6 +635,50 @@ def admin_delete_collector(collector_id):
 
     flash("Collector account removed.", "info")
     return redirect(url_for("admin_dashboard"))
+
+
+@app.route("/admin/export/csv")
+def admin_export_csv():
+    if session.get("role") != "admin":
+        return redirect(url_for("admin_login"))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT c.complaint_id, u.name AS citizen_name, u.email AS citizen_email,
+               c.location, c.latitude, c.longitude, c.status, co.name AS collector_name,
+               c.description, c.created_at, c.updated_at
+        FROM complaints c
+        LEFT JOIN users u ON c.user_id = u.id
+        LEFT JOIN collectors co ON c.assigned_collector = co.id
+        ORDER BY c.created_at DESC
+        """
+    )
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "Complaint ID", "Citizen Name", "Citizen Email", "Location",
+        "Latitude", "Longitude", "Status", "Assigned Collector",
+        "Description", "Created At", "Updated At"
+    ])
+    for r in rows:
+        writer.writerow([
+            r["complaint_id"], r["citizen_name"], r["citizen_email"],
+            r["location"], r["latitude"], r["longitude"], r["status"],
+            r["collector_name"], r["description"], r["created_at"], r["updated_at"]
+        ])
+
+    output.seek(0)
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=ecoreminder_reports.csv"},
+    )
 
 
 @app.route("/api/complaints")
