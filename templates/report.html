@@ -43,10 +43,21 @@
             <div id="mapPickerContainer" class="map-picker-container"></div>
           </div>
 
-          <!-- Description -->
-          <div class="mb-4">
-            <label class="form-label fw-bold">Bin Details / Description (Optional)</label>
-            <textarea name="description" class="form-control" rows="3" placeholder="e.g. Organic waste bin overflowing near the entrance gate, high priority..."></textarea>
+          <!-- Priority & Description -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Urgency / Priority</label>
+              <select name="priority" class="form-select">
+                <option value="Low">Low (Standard Bin)</option>
+                <option value="Medium" selected>Medium (Overflowing)</option>
+                <option value="High">High (Hazardous/Foul Odor)</option>
+                <option value="Critical">Critical (Blockage/Emergency)</option>
+              </select>
+            </div>
+            <div class="col-md-8">
+              <label class="form-label fw-bold">Bin Details / Description (Optional)</label>
+              <input type="text" name="description" class="form-control" placeholder="e.g. Organic waste bin overflowing near entrance gate..." />
+            </div>
           </div>
 
           <!-- Photo Upload & Thumbnail Preview -->

@@ -142,6 +142,8 @@ def init_db():
         cursor.execute("ALTER TABLE complaints ADD COLUMN latitude REAL")
     if "longitude" not in columns:
         cursor.execute("ALTER TABLE complaints ADD COLUMN longitude REAL")
+    if "priority" not in columns:
+        cursor.execute("ALTER TABLE complaints ADD COLUMN priority TEXT DEFAULT 'Medium'")
 
     cursor.execute("PRAGMA table_info(collectors)")
     collector_cols = [row["name"] for row in cursor.fetchall()]
@@ -309,6 +311,7 @@ def report():
     if request.method == "POST":
         location = request.form.get("location", "").strip()
         description = request.form.get("description", "").strip()
+        priority = request.form.get("priority", "Medium").strip()
         lat_val = request.form.get("latitude", "").strip()
         lng_val = request.form.get("longitude", "").strip()
 
@@ -329,8 +332,8 @@ def report():
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO complaints (user_id, location, latitude, longitude, description, image) VALUES (?, ?, ?, ?, ?, ?)",
-            (session["user_id"], location, latitude, longitude, description, filename),
+            "INSERT INTO complaints (user_id, location, latitude, longitude, description, image, priority) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (session["user_id"], location, latitude, longitude, description, filename, priority),
         )
         conn.commit()
         cursor.close()
