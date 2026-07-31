@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: ecoreminder-web
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_SECRET_KEY=ecoreminder-docker-secret-2026
+      - FLASK_ENV=production
+    volumes:
+      - ./database.db:/app/database.db
+      - ./static/images/uploads:/app/static/images/uploads
+    restart: unless-stopped
