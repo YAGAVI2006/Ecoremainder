@@ -371,6 +371,46 @@ def citizen_dashboard():
     return render_template("citizen_dashboard.html", complaints=complaints)
 
 
+@app.route("/citizen/profile", methods=["GET", "POST"])
+def citizen_profile():
+    if session.get("role") != "citizen":
+        return redirect(url_for("login"))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        current_password = request.form.get("current_password", "")
+        new_password = request.form.get("new_password", "")
+
+        cursor.execute("SELECT * FROM users WHERE id=?", (session["user_id"],))
+        user = cursor.fetchone()
+
+        if user and name:
+            if new_password:
+                if not check_password(current_password, user["password"]):
+                    flash("Current password is incorrect.", "danger")
+                    cursor.close()
+                    conn.close()
+                    return redirect(url_for("citizen_profile"))
+                hashed = hash_password(new_password)
+                cursor.execute("UPDATE users SET name=?, password=? WHERE id=?", (name, hashed, session["user_id"]))
+            else:
+                cursor.execute("UPDATE users SET name=? WHERE id=?", (name, session["user_id"]))
+
+            conn.commit()
+            session["name"] = name
+            flash("Profile updated successfully.", "success")
+
+    cursor.execute("SELECT * FROM users WHERE id=?", (session["user_id"],))
+    user = parse_row(cursor.fetchone())
+    cursor.close()
+    conn.close()
+
+    return render_template("profile.html", user=user)
+
+
 @app.route("/collector/login", methods=["GET", "POST"])
 def collector_login():
     if request.method == "POST":
