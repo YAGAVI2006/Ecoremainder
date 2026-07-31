@@ -1,245 +1,134 @@
-# EcoReminder — Smart Dustbin Alert System# EcoReminder — Smart Dustbin Alert System
+# EcoReminder — Smart Dustbin Alert & Waste Management System
 
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Python Version](https://img.shields.io/badge/python-3.11+-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Flask](https://img.shields.io/badge/framework-Flask-000000)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-- Add geolocation on reports and a map view.- Add pagination and search in dashboards.- Add email notifications when reports are created / updated.- Add user roles and permissions more robustly with `flask-login`.## 🔧 Optional Enhancements- If you want to create additional collector accounts, insert them into the `collectors` table manually or add a registration flow as needed.- Uploaded images are stored in `static/images/uploads/`.## 📌 Notes```│   ├── images/│   ├── js/│   ├── css/├── static/││   ├── admin_dashboard.html│   ├── collector_dashboard.html│   ├── citizen_dashboard.html│   ├── report.html│   ├── register.html│   ├── login.html│   ├── index.html│   ├── base.html├── templates/├── .env.example├── README.md├── requirements.txt├── app.py│EcoReminder```## 🗂️ Project Structure  - password: `admin123`  - username: `admin`- **Admin** (created on first run):## 🧩 AccountsThe application will be available at: **http://127.0.0.1:5000**```flask runset FLASK_ENV=developmentset FLASK_APP=app.py```bash### 5) Run the app3. Copy `.env.example` to `.env` and update values if needed.```CREATE DATABASE ecoreminder;```sql2. Create a database:1. Start MySQL (or MariaDB).### 4) Configure database```pip install -r requirements.txt```bash### 3) Install dependencies```.\.venv\Scripts\activatepython -m venv .venv```bash### 2) Create a Python virtual environment```cd c:\Users\HP\Desktop\Ecoremainder```bash### 1) Clone / open the project## 🚀 Quick Start- **Charts**: Chart.js- **Database**: MySQL- **Backend**: Python Flask- **Frontend**: HTML, CSS, JavaScript, Bootstrap## 🧰 Tech Stack- **Database**: MySQL-backed storage for users, collectors, complaints, and admins- **Analytics**: charts showing total/pending/completed reports- **Admin module**: secure admin login, view all complaints, assign collectors, monitor dashboard analytics- **Collector module**: login, view assigned complaints, accept tasks, update statuses, upload proof images- **Citizen module**: register/login, report full bins, upload images, track status, view history## ✅ FeaturesEcoReminder is a full-stack web application that enables citizens to report full garbage bins, allows officers to manage collections, and provides administrators with analytics and task assignment features.
-EcoReminder is a full-stack web application built with **Python Flask**, **MySQL**, and **Bootstrap**. It helps citizens report full garbage bins, enables collectors to manage and update collections, and provides an admin dashboard with analytics.
+EcoReminder is a modern, full-stack web application designed to streamline urban sanitation. It enables citizens to report overflowing dustbins via GPS-tagged interactive maps, empowers sanitation officers to manage collection routes with proof photo verification, and provides city administrators with real-time analytics, CSV report exporting, and officer dispatching.
 
 ---
 
-## ✅ Features
+## 🌟 Key Features
 
-### Citizen Module
-- Register + login
-- Submit a full dustbin report (location + photo)
-- Track report status
-- View history of complaints
+### 🟢 Citizen Portal
+- **Interactive Map Picker**: Drag markers or click anywhere on the Leaflet.js map to pinpoint exact dustbin coordinates.
+- **GPS Auto-Detection**: One-click "Detect My Location" using browser HTML5 Geolocation API.
+- **Urgency Classification**: Categorize reports by priority level (*Low*, *Medium*, *High*, *Critical*).
+- **Live Status Tracker**: Monitor progress from `Pending` -> `In Progress` -> `Collected`.
+- **Photo Proof Verification**: View side-by-side Before/After photos comparing report images against collector proof photos.
 
-### Garbage Collector Module
-- Collector login
-- View assigned complaints
-- Accept tasks
-- Update status (Pending → In Progress → Collected)
-- Upload proof image after collection
+### 🔵 Sanitation Officer Portal
+- **Assigned Route Maps**: View all assigned collection tasks pinned on an interactive city map.
+- **Status Updating**: Transition tasks to `In Progress` and `Collected`.
+- **Proof Photo Upload**: Upload clean-up proof images upon waste pickup with live thumbnail preview.
 
-### Admin Module
-- Secure admin login
-- View all complaints
-- Assign complaints to collectors
-- Monitor status counts and chart analytics
+### 🔴 Admin & Municipal Panel
+- **Real-Time Analytics**: Chart.js doughnut graphs displaying status distributions.
+- **City-Wide Pin Network**: Live map showing all active and collected bin markers color-coded by status.
+- **Collector Management**: Add, view, and remove sanitation officer accounts directly from the UI.
+- **CSV Data Export**: Download complete complaint reports in `.csv` format for municipal auditing.
 
----
-
-## 🧱 Tech Stack
-- **Frontend:** HTML, CSS, JavaScript, Bootstrap
-- **Backend:** Python (Flask)
-- **Database:** MySQL
-- **Charts:** Chart.js
+### 🌙 Dark / Light Mode Support
+- Seamless theme toggle with persistent user preference stored in `localStorage`.
 
 ---
 
-## 🚀 Setup (Local Development)
+## 🚀 Quick Start (Local Setup)
 
-### 1) Clone / open this repository in VS Code
+### 1) Clone Repository
+```bash
+git clone https://github.com/YAGAVI2006/Ecoremainder.git
+cd Ecoremainder
+```
 
-### 2) Create a Python virtual environment
-
+### 2) Create Virtual Environment & Install Dependencies
 ```bash
 python -m venv .venv
-```
+# On Windows:
+.\.venv\Scripts\activate
+# On Linux/macOS:
+source .venv/bin/activate
 
-### 3) Activate the venv
-
-**Windows (PowerShell)**
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-**Windows (CMD)**
-
-```cmd
-.\.venv\Scripts\activate.bat
-```
-
-### 4) Install dependencies
-
-```bash
 pip install -r requirements.txt
 ```
 
-### 5) Setup the database
-
-1. Start MySQL service.
-2. Create a database:
-
-```sql
-CREATE DATABASE ecoreminder;
-```
-
-3. Update `.env` using `.env.example` values.
-
-### 6) Configure environment variables
-
-Copy the example file:
-
-```bash
-copy .env.example .env
-```
-
-Update `.env` values as needed (DB credentials, secret key).
-
-### 7) Run the app
-
+### 3) Run Application
 ```bash
 python app.py
 ```
-
-Then open: http://127.0.0.1:5000
-
----
-
-## 🔐 Default Admin Credentials
-
-When the app starts, it seeds a default admin user (if none exists):
-
-- **username:** `admin`
-- **password:** `admin123`
-
-> ⚠️ Change this password immediately in production.
+Open **http://127.0.0.1:5000** in your browser.
 
 ---
 
-## 🗂️ Project Structure
+## 🔐 Default Demo Credentials
+
+| Role | Username / Email | Password | Access Rights |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin` | `admin123` | System Analytics, CSV Export, Officer Dispatch, Assignment |
+| **Collector** | `john@ecoreminder.com` | `collector123` | Assigned Tasks Route Map, Status Updating, Proof Upload |
+| **Citizen** | `citizen@ecoreminder.com` | `citizen123` | GPS Bin Reporting, Live History Tracking, Profile Settings |
+
+---
+
+## 🐳 Docker Deployment
+
+To launch EcoReminder using Docker Compose:
+
+```bash
+docker-compose up --build -d
+```
+App will be served on **http://localhost:5000**.
+
+---
+
+## 🧪 Running Tests
+
+To run the automated integration and database unit test suites:
+
+```bash
+python -m unittest discover -s tests
+```
+
+---
+
+## 📂 Project Structure
 
 ```
 EcoReminder/
-├── app.py
-├── requirements.txt
-├── templates/
-│   ├── admin_dashboard.html
-│   ├── admin_login.html
-│   ├── base.html
-│   ├── citizen_dashboard.html
-│   ├── collector_dashboard.html
-│   ├── collector_login.html
-│   ├── index.html
-│   ├── login.html
-│   ├── register.html
-│   └── report.html
+├── app.py                      # Flask main controller & route handlers
+├── db.py                       # Modular database connection & access helpers
+├── requirements.txt            # Python dependencies
+├── Dockerfile                  # Container build instructions
+├── docker-compose.yml          # Container orchestration manifest
+├── .github/workflows/ci.yml    # GitHub Actions CI pipeline
+├── docs/                       # Architecture & ERD documentation
+│   └── ARCHITECTURE.md
+├── scripts/                    # Utility scripts (backup & demo seed)
+│   ├── backup_db.py
+│   └── seed_demo.py
+├── utils/                      # Security & validation utilities
+│   └── security.py
+├── tests/                      # Automated test suites
+│   ├── test_routes.py
+│   └── test_db.py
 ├── static/
-│   ├── css/
-│   ├── js/
-│   └── images/
-└── .env.example
+│   ├── css/style.css           # Eco-Modern design system & dark mode CSS
+│   ├── js/app.js               # Leaflet maps & client-side table filter JS
+│   └── js/theme.js             # Theme switcher logic
+└── templates/                  # Jinja2 HTML templates
+    ├── base.html
+    ├── index.html
+    ├── report.html
+    ├── citizen_dashboard.html
+    ├── collector_dashboard.html
+    ├── admin_dashboard.html
+    ├── profile.html
+    ├── 404.html
+    └── 500.html
 ```
 
 ---
 
-## 🧩 Notes
-
-- Uploaded images are saved to `static/images/uploads/`.
-- Status chart uses Chart.js (included via CDN).
-- You can customize styling in `static/css/style.css`.
-
-Enjoy building a cleaner city with EcoReminder! 🌍
+## 📜 License
+Distributed under the MIT License. See `LICENSE` for details.
