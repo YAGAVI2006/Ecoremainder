@@ -772,6 +772,37 @@ def api_complaints():
     return jsonify(result)
 
 
+@app.route("/api/history")
+def api_history():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT status, COUNT(*) as count FROM complaints GROUP BY status
+        """
+    )
+    status_summary = {row["status"]: row["count"] for row in cursor.fetchall()}
+
+    cursor.execute(
+        """
+        SELECT complaint_id, location, status, created_at FROM complaints ORDER BY created_at DESC LIMIT 5
+        """
+    )
+    recent_rows = cursor.fetchall()
+    recent = [parse_row(r) for r in recent_rows]
+    for r in recent:
+        if r.get("created_at") and isinstance(r["created_at"], datetime):
+            r["created_at"] = r["created_at"].strftime("%Y-%m-%d %H:%M")
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({
+        "status_summary": status_summary,
+        "recent_complaints": recent
+    })
+
+
 @app.route("/uploads/<path:filename>")
 def uploads(filename):
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
